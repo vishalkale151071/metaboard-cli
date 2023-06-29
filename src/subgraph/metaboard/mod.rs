@@ -1,11 +1,11 @@
-use std::fmt;
-
 use clap::Parser;
 use reqwest::Url;
 use graphql_client::{GraphQLQuery, Response};
 use rust_bigint::BigInt;
 use serde_bytes::ByteBuf as Bytes;
 use anyhow::anyhow;
+use serde::{Serialize, Deserialize};
+use ethabi::{encode, Token};
 
 
 use self::meta_board_query::MetaBoardQueryMetaBoard;
@@ -30,19 +30,29 @@ pub struct Build {
     meta_board_id: Option<String>
 }
 
-impl fmt::Debug for MetaBoardQueryMetaBoard {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut metas_id:String = String::new();
+#[derive(Serialize, Deserialize)]
+struct MetaboardResponse {
+    id: Bytes,
+    address: Bytes,
+    metaCount: BigInt,
+    metas: Vec<String>
+}
+
+impl MetaBoardQueryMetaBoard {
+    fn to_meta_board_response(&self) -> MetaboardResponse {
+        let mut metas_id: Vec<String> = vec![];
         if let Some(metas) = &self.metas {
             for meta in metas {
-                    metas_id = meta.id.clone();
+                    metas_id.push(meta.id.clone());
             }
         }
-        f.debug_struct("MetaBoard")
-            .field("id", &hex::encode(&self.id))
-            .field("metaCount", &self.meta_count)
-            .field("metas_id", &metas_id)
-            .finish()
+        let response = MetaboardResponse {
+            id: self.id.clone(),
+            address: self.address.clone(),
+            metaCount: self.meta_count.clone(),
+            metas: metas_id
+        };
+        response
     }
 }
 
@@ -70,7 +80,10 @@ pub async fn query(build: Build) -> anyhow::Result<()> {
             data: Some(meta_board_query::ResponseData {meta_board}),
             ..
         } => {
-            dbg!(&meta_board);
+            let reponse = meta_board.unwrap().to_meta_board_response();
+            let serialized = serde_json::to_string(&reponse).expect("Serialization failed");
+            let encoded: Vec<u8> = encode(&[Token::String(serialized)]);
+            print!("{:?}", encoded);
         },
         _ => { tracing::warn!("Failed to get metaboard"); }
     }

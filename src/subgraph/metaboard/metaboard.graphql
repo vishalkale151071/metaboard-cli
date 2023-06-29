@@ -1,6 +1,7 @@
 query MetaBoardQuery($metaboard: String) {
   metaBoard(id: $metaboard) {
     id
+    address
     metaCount
     metas {
       id
