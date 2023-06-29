@@ -1,0 +1,9 @@
+query MetaBoardQuery($metaboard: String) {
+  metaBoard(id: $metaboard) {
+    id
+    metaCount
+    metas {
+      id
+    }
+  }
+}
