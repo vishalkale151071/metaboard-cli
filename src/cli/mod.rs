@@ -1,10 +1,11 @@
 use anyhow::Result;
 use clap::command;
 use clap::{Parser, Subcommand};
+use crate::subgraph::deploy::Config;
 use crate::subgraph::metaboard::Build;
 
 mod metaboard;
-
+mod deploy;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
@@ -14,12 +15,14 @@ struct Cli {
 
 #[derive(Subcommand)]
 pub enum MetaBoardOption {
-    MetaBoard(Build)
+    MetaBoard(Build),
+    Deploy(Config)
 }
 
 pub async fn dispatch(metaboard: MetaBoardOption) -> Result<()> {
     match metaboard {
-        MetaBoardOption::MetaBoard(build) => metaboard::show(build).await
+        MetaBoardOption::MetaBoard(build) => metaboard::show(build).await,
+        MetaBoardOption::Deploy(config) =>  deploy::deploy(config).await
     }
 }
 
