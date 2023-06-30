@@ -7,7 +7,9 @@ use crate::subgraph::metaboard::Build;
 #[command(about = "Interact with an order(s) onchain and offchain.")]
 pub enum MetaBoard {
     #[command(about = "show metaboard entity")]
-    Show(Build)
+    Show(Build),
+    #[command(about = "show metaboard entity")]
+    Metas
 }
 
 pub async fn show(build: Build) -> anyhow::Result<()> {
