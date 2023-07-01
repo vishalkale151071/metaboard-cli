@@ -1,2 +1,3 @@
-pub mod metaboard;
+pub mod query;
 pub mod deploy;
+pub mod wait;

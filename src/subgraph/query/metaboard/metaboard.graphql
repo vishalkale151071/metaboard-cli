@@ -1,4 +1,4 @@
-query MetaBoardQuery($metaboard: String) {
+query MetaBoard($metaboard: String) {
   metaBoard(id: $metaboard) {
     id
     address

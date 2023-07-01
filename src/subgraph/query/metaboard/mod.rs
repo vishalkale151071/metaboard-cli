@@ -6,19 +6,20 @@ use graphql_client::{GraphQLQuery, Response};
 use rust_bigint::BigInt;
 use serde_bytes::ByteBuf as Bytes;
 use ethabi::{encode, Token, ethereum_types::H160, Uint};
+use anyhow::anyhow;
 
 #[derive(GraphQLQuery)]
 #[derive(Debug)]
 #[graphql(
-    schema_path = "src/subgraph/metaboard/metaboard.schema.json",
-    query_path = "src/subgraph/metaboard/metaboard.graphql",
+    schema_path = "src/subgraph/query/schema.json",
+    query_path = "src/subgraph/query/metaboard/metaboard.graphql",
     reseponse_derives = "Debug, Serialize, Deserialize",
 )]
 
-pub struct MetaBoardQuery;
+pub struct MetaBoard;
 
 #[derive(Parser)]
-pub struct Build {
+pub struct MetaBoardStruct {
     // subgraph api endpoint. if not given, local graph-node endpoint is used
     #[arg(short = 'e', long = "end_point", default_value= "http://localhost:8000/subgraphs/name/test/test")]
     end_point: Option<Url>,
@@ -28,18 +29,21 @@ pub struct Build {
 }
 
 
-pub async fn query(build: Build) -> anyhow::Result<()> {
+pub async fn query(build: MetaBoardStruct) -> anyhow::Result<()> {
    
     let url = Url::from(build.end_point.unwrap());
-
-    let variables = meta_board_query::Variables {
-        metaboard: build.meta_board_id,
+    let meta_board_id = match build.meta_board_id {
+        Some(id) => id.into(),
+        None => return Err(anyhow!("No meta-board-id provided")) 
+    };
+    let variables = meta_board::Variables {
+        metaboard: meta_board_id,
     };
 
-    let request_body = MetaBoardQuery::build_query(variables);
+    let request_body = MetaBoard::build_query(variables);
     let client = reqwest::Client::new();
     let res = client.post(url.clone()).json(&request_body).send().await?;
-    let response_body: Response<meta_board_query::ResponseData> = res.json().await?;
+    let response_body: Response<meta_board::ResponseData> = res.json().await?;
 
     if let Some(meta_board) = response_body.data.and_then(|data| data.meta_board) {
         let id = String::from_utf8(meta_board.id.to_vec()).unwrap();
