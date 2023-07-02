@@ -100,11 +100,10 @@ pub async fn deploy(config: Config) -> anyhow::Result<()> {
         let output = Command::new("bash")
             .args(&[
                 "-c",
-                format!(
+                &format!(
                     "npx graph auth --product hosted-service {}",
                     graph_access_token
-                )
-                .as_ref(),
+                ),
             ])
             .output()
             .expect("Failed graph auth command");

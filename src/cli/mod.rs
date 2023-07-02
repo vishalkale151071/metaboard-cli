@@ -6,6 +6,7 @@ use crate::subgraph::deploy::Config;
 mod query;
 mod deploy;
 mod wait;
+mod test;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
@@ -18,14 +19,16 @@ pub enum MetaBoardOption {
     #[command(subcommand)]
     Query(query::Query),
     Deploy(Config),
-    Wait
+    Wait,
+    Test(test::TestConfig)
 }
 
 pub async fn dispatch(metaboard: MetaBoardOption) -> Result<()> {
     match metaboard {
         MetaBoardOption::Query(query) => query::dispatch(query).await,
         MetaBoardOption::Deploy(config) =>  deploy::deploy(config).await,
-        MetaBoardOption::Wait => wait::wait().await
+        MetaBoardOption::Wait => wait::wait().await,
+        MetaBoardOption::Test(config) => test::test(config).await
     }
 }
 
