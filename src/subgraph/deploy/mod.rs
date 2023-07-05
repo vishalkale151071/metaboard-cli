@@ -46,56 +46,45 @@ pub struct Config {
 }
 
 pub async fn deploy(config: Config) -> anyhow::Result<()> {
-    let network = match config.network {
-        Some(network) => network,
-        None => return Err(anyhow!("No network provided")),
-    };
+    let network = config
+        .network
+        .unwrap_or_else(|| Err(anyhow!("No network provided")).unwrap());
 
-    let contract = match config.contract_address {
-        Some(address) => address,
-        None => return Err(anyhow!("No contract address provided")),
-    };
+    let contract = config
+        .contract_address
+        .unwrap_or_else(|| Err(anyhow!("No contract address provided")).unwrap());
 
-    let block_number = match config.block_number {
-        Some(block) => block,
-        None => return Err(anyhow!("No block-number provided")),
-    };
+    let block_number = config
+        .block_number
+        .unwrap_or_else(|| Err(anyhow!("No block-number provided")).unwrap());
 
-    let output_path = match config.output_path {
-        Some(path) => path,
-        None => return Err(anyhow!("No output path provided")),
-    };
+    let output_path = config
+        .output_path
+        .unwrap_or_else(|| Err(anyhow!("No output path provided")).unwrap());
 
-    let subgraph_template = match config.subgraph_template {
-        Some(path) => path,
-        None => return Err(anyhow!("No subgraph-template path provided")),
-    };
+    let subgraph_template = config
+        .subgraph_template
+        .unwrap_or_else(|| Err(anyhow!("No subgraph-template path provided")).unwrap());
 
-    let root_dir = match config.root_dir {
-        Some(path) => path,
-        None => return Err(anyhow!("No root path provided")),
-    };
+    let root_dir = config
+        .root_dir
+        .unwrap_or_else(|| Err(anyhow!("No root path provided")).unwrap());
 
-    let end_point = match config.end_point {
-        Some(val) => val,
-        None => return Err(anyhow!("No end-point provided")),
-    };
+    let end_point = config
+        .end_point
+        .unwrap_or_else(|| Err(anyhow!("No end-point provided")).unwrap());
 
-    let subgraph_name = match config.subgraph_name {
-        Some(name) => name,
-        None => return Err(anyhow!("No subgraph-name provided provided")),
-    };
+    let subgraph_name = config
+        .subgraph_name
+        .unwrap_or_else(|| Err(anyhow!("No subgraph-name provided provided")).unwrap());
 
-    let version_lable = match config.version_lable {
-        Some(label) => label,
-        None => return Err(anyhow!("No version-lable provided provided")),
-    };
+    let version_lable = config
+        .version_lable
+        .unwrap_or_else(|| Err(anyhow!("No version-lable provided provided")).unwrap());
 
-    if network.clone().ne(&String::from_str("localhost").unwrap()) {
-        let graph_access_token = match config.graph_access_token {
-            Some(token) => token,
-            None => return Err(anyhow!("Graph Access Token is not proiveded.")),
-        };
+    if network != "localhost" {
+        let graph_access_token = config.graph_access_token
+        .unwrap_or_else(|| Err(anyhow!("Graph Access Token is not proiveded.")).unwrap());
 
         let output = Command::new("bash")
             .args(&[

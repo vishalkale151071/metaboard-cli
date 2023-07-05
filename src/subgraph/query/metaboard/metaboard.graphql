@@ -3,7 +3,7 @@ query MetaBoard($metaboard: String) {
     id
     address
     metaCount
-    metas {
+    metas(orderBy: blockNumber) {
       id
     }
   }

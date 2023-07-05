@@ -1,19 +1,16 @@
-use std::{fs, process::Command};
 use anyhow::anyhow;
 use clap::Parser;
+use std::{fs, process::Command};
 
 #[derive(Parser)]
 pub struct TestConfig {
-     // script dir
-     #[arg(short = 's', long = "script-dir")]
-     script_dir: Option<String>
+    // script dir
+    #[arg(short = 's', long = "script-dir")]
+    script_dir: Option<String>,
 }
 
 pub async fn test(config: TestConfig) -> anyhow::Result<()> {
-    let dir_path = match config.script_dir {
-        Some(path) => path,
-        None => return Err(anyhow!("No script dir provided"))
-    };
+    let dir_path = config.script_dir.ok_or(anyhow!("No script dir provided"))?;
 
     let rpc_url = "http://127.0.0.1:8545";
     // Read the directory contents
@@ -46,7 +43,7 @@ pub async fn test(config: TestConfig) -> anyhow::Result<()> {
                     .args(&[
                         "-c",
                         &format!(
-                            "forge script scripts/{} --silent --ffi --broadcast --rpc-url {}",
+                            "forge script scripts/{} -vv --ffi --broadcast --rpc-url {}",
                             file, rpc_url
                         ),
                     ])
@@ -57,7 +54,7 @@ pub async fn test(config: TestConfig) -> anyhow::Result<()> {
                     println!("{}", stdout);
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
-                    return Err(anyhow!("{}", stderr));
+                    return Err(anyhow::format_err!("Command failed with error: {}", stderr));
                 }
             }
         }
